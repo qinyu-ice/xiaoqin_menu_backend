@@ -1,11 +1,9 @@
 package org.qinyu.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -40,16 +39,6 @@ public class JwtUtil {
         return getClaims(token).getSubject();
     }
 
-    // 校验 token 是否有效（未过期、签名正确）
-    public boolean validateToken(String token) {
-        try {
-            getClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
@@ -61,5 +50,24 @@ public class JwtUtil {
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            getClaims(token);
+            log.info("Token 有效（未过期，签名正确）");
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.warn("Token 已过期: {}", e.getMessage());
+        } catch (SignatureException e) {
+            log.warn("Token 签名错误: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.warn("Token 格式错误: {}", e.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.warn("Token 为空或非法参数: {}", e.getMessage());
+        } catch (JwtException e) {
+            log.warn("其他 JWT 异常: {}", e.getMessage());
+        }
+        return false;
     }
 }
