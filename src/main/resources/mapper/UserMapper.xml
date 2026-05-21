@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.qinyu.mapper.UserMapper">
+
+    <update id="updateById" parameterType="org.qinyu.dto.UserUpdateDTO">
+        UPDATE user
+        SET
+        <!-- 使用 trim 标签处理多余的逗号：prefixOverrides 去掉开头的逗号，suffixOverrides 去掉结尾的逗号 -->
+        <trim prefix="" suffix="" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="realName != null and realName != ''">
+                real_name = #{realName},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            update_time = now()
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+</mapper>
