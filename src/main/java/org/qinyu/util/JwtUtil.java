@@ -23,8 +23,9 @@ public class JwtUtil {
     private Long expiration;        // token 有效期（毫秒）
 
     // 生成 token
-    public String generateToken(String username) {
+    public String generateToken(String username, String userId) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)
@@ -37,6 +38,11 @@ public class JwtUtil {
     // 从 token 中解析用户名
     public String getUsernameFromToken(String token) {
         return getClaims(token).getSubject();
+    }
+
+    // 从 token 中解析用户ID
+    public String getUserIdFromToken(String token) {
+        return getClaims(token).get("userId").toString();
     }
 
     private Claims getClaims(String token) {

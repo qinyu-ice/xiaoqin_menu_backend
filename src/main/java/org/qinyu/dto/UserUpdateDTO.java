@@ -10,8 +10,8 @@ public class UserUpdateDTO {
     @Schema(description = "用户ID", example = "a1b2c3d4e5f67890abcdef1234")
     private String id;
 
-    @Schema(description = "用户名", example = "qinyu")
-    private String name;
+    @Schema(description = "昵称", example = "qin")
+    private String nickname;
 
     @Schema(description = "真实姓名", example = "")
     private String realName;

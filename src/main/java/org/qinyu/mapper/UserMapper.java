@@ -15,8 +15,8 @@ public interface UserMapper extends BaseMapper<User> {
         return selectOne(new LambdaQueryWrapper<User>().eq(User::getName, name));
     }
 
-    @Insert("insert into user (id, name, password, real_name, email, phone, permission, create_time, update_time) " +
-            "VALUES (#{id},#{name},#{password},#{realName},#{email},#{phone},#{permission},now(),now())")
+    @Insert("insert into user (id,nickname, name, password, permission, create_time, update_time) " +
+            "VALUES (#{id},#{nickname},#{name},#{password},#{permission},now(),now())")
     void add(User user);
 
     void updateById(UserUpdateDTO dto);

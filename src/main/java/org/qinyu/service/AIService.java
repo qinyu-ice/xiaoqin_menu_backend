@@ -37,4 +37,11 @@ public interface AIService {
      * @return 回答
      */
     Flux<String> askStreamWithMemory(String userMessage, String conversationId);
+
+    /**
+     * 根据会话ID删除会话
+     *
+     * @param conversationId 会话ID
+     */
+    Boolean deleteConversation(String conversationId);
 }

@@ -46,6 +46,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = new User();
         // 随机生成26位UUID赋值给用户ID
         user.setId(UUID.randomUUID().toString().replace("-", "").substring(0, 26));
+        user.setNickname(dto.getName());
         user.setName(dto.getName());
         // SpringSecurity BCrypt 加密
         // 校验方法：BCrypt.checkpw(明文, 数据库密文)
@@ -76,7 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Authentication authentication = authenticationManager.authenticate(authToken);
 
         // 3. 认证成功后生成 JWT
-        String jwt = jwtUtil.generateToken(dto.getName());
+        String jwt = jwtUtil.generateToken(dto.getName(), user.getId());
 
         map.put("message", "用户" + dto.getName() + "登录成功");
         map.put("id", user.getId());
@@ -86,6 +87,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public String update(UserUpdateDTO dto) {
+        if (dto.getId().isEmpty()) {
+            return "用户ID为空";
+        }
         userMapper.updateById(dto);
         return "用户" + dto.getId() + "更新成功";
     }
