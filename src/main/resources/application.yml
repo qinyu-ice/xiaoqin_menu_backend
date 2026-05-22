@@ -42,3 +42,9 @@ spring:
         model: deepseek-chat  # 指定模型，如 deepseek-chat
         temperature: 0.7      # 控制回复的随机性，范围0-2[reference:9]
         max-tokens: 2000      # 控制回复的最大长度[reference:10][reference:11]
+
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always   # 自动建表
