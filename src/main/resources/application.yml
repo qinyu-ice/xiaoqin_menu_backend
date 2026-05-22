@@ -28,3 +28,17 @@ spring:
       connection-test-query: select 1
       auto-commit: true
       idle-timeout: 60000
+
+  application:
+    name: springai
+  config:
+    import:
+      - optional:file:.env.local[.properties]     # 以 .properties 文件的格式读取 .env.local，模拟环境变量读取
+
+  ai:
+    deepseek:
+      api-key: ${DEEPSEEK_API_KEY}
+      chat:
+        model: deepseek-chat  # 指定模型，如 deepseek-chat
+        temperature: 0.7      # 控制回复的随机性，范围0-2[reference:9]
+        max-tokens: 2000      # 控制回复的最大长度[reference:10][reference:11]
