@@ -13,6 +13,9 @@ public class UserUpdateDTO {
     @Schema(description = "昵称", example = "qin")
     private String nickname;
 
+    @Schema(description = "密码", example = "$2a$10$Z7XQH5sK8aL9bJ2mN4vB5uC6iD7eF8gH9jK0lL1kK2jJ3hH4gG5fF")
+    private String password;
+
     @Schema(description = "真实姓名", example = "")
     private String realName;
 
@@ -21,5 +24,8 @@ public class UserUpdateDTO {
 
     @Schema(description = "联系电话", example = "18782565458")
     private String phone;
+
+    @Schema(description = "是否启用：1-启用；0-禁用", example = "1")
+    private Integer isEnable;
 
 }

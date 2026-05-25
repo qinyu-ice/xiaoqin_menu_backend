@@ -10,6 +10,9 @@
             <if test="nickname != null and nickname != ''">
                 nickname = #{nickname},
             </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
             <if test="realName != null and realName != ''">
                 real_name = #{realName},
             </if>
@@ -19,9 +22,29 @@
             <if test="phone != null and phone != ''">
                 phone = #{phone},
             </if>
+            <if test="isEnable != null and isEnable != ''">
+                is_enable = #{isEnable},
+            </if>
             update_time = now()
         </trim>
         WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByIds" parameterType="list">
+        delete from user
+        where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="resetPassword" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            update user
+            set password = #{item.password},
+            is_reset_password = 3
+            where id = #{item.id}
+        </foreach>
     </update>
 
 </mapper>

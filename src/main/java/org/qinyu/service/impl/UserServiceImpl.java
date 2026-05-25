@@ -3,6 +3,7 @@ package org.qinyu.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.qinyu.dto.UserLoginDTO;
 import org.qinyu.dto.UserRegisterDTO;
+import org.qinyu.dto.UserResetPasswordDTO;
 import org.qinyu.dto.UserUpdateDTO;
 import org.qinyu.entity.User;
 import org.qinyu.mapper.UserMapper;
@@ -17,10 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -57,6 +55,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 校验方法：BCrypt.checkpw(明文, 数据库密文)
         user.setPassword(BCrypt.hashpw(dto.getPassword(), BCrypt.gensalt()));
         user.setPermission(3);
+        user.setIsEnable(1);
+        user.setIsResetPassword(1);
         userMapper.add(user);
         return "用户" + dto.getName() + "注册成功";
     }
@@ -72,6 +72,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (Objects.isNull(user)) {
             map.put("message", "用户" + dto.getName() + "不存在");
             return map;
+        }
+        if (user.getIsEnable() == 0) {
+            map.put("message", "用户" + dto.getName() + "已被禁用");
         }
         if (!BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
             map.put("message", "用户" + dto.getName() + "密码错误");
@@ -90,20 +93,102 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         map.put("message", "用户" + dto.getName() + "登录成功");
         map.put("id", user.getId());
+        map.put("name", user.getName());
         map.put("token", jwt);
-        redisTemplate.opsForValue().set("currentUserId", user.getId(), Duration.ofHours(2));
-        redisTemplate.opsForValue().set("currentUserName", user.getName(), Duration.ofHours(2));
-        redisTemplate.opsForValue().set("token", jwt, Duration.ofHours(2));
-        redisTemplate.opsForValue().set("refresh", "refresh" + jwt, Duration.ofDays(7));
+        String tokenKey = "user:token:" + user.getId();
+        String refreshKey = "user:refresh:" + user.getId();
+        redisTemplate.opsForValue().set(tokenKey, jwt, Duration.ofHours(2));
+        redisTemplate.opsForValue().set(refreshKey, "refresh" + jwt, Duration.ofDays(7));
         return map;
     }
 
     @Override
-    public String update(UserUpdateDTO dto) {
-        if (dto.getId().isEmpty()) {
-            return "用户ID为空";
+    public String update(UserUpdateDTO dto, String token) {
+        User user = getUserByToken(token);
+        // 任何人都可修改自己的信息
+        if (user.getId().equals(dto.getId())) {
+            userMapper.updateById(dto);
+            return "用户" + dto.getId() + "更新成功";
         }
-        userMapper.updateById(dto);
-        return "用户" + dto.getId() + "更新成功";
+        // 超级管理员可以修改任何人的信息
+        if (user.getPermission() == 1) {
+            userMapper.updateById(dto);
+            return "用户" + dto.getId() + "更新成功";
+        }
+        // 普通管理员可修改普通用户的信息
+        if (user.getPermission() == 2 && userMapper.selectById(dto.getId()).getPermission() == 3) {
+            userMapper.updateById(dto);
+            return "用户" + dto.getId() + "更新成功";
+        }
+        throw new RuntimeException("暂无权限");
+    }
+
+    @Override
+    public String delete(List<String> ids) {
+        for (String id : ids) {
+            if (id.isEmpty()) {
+                return "用户ID不能为空";
+            }
+        }
+        userMapper.deleteByIds(ids);
+        return "用户删除成功";
+    }
+
+    @Override
+    public String applyResetPassword(String id) {
+        if (id.isEmpty()) {
+            return "用户ID不能为空";
+        }
+        userMapper.updateIsResetPassword(id);
+        return "用户" + id + "申请重置密码成功，请等待管理员审核";
+    }
+
+    @Override
+    public String resetPassword(List<UserResetPasswordDTO> dtoList) {
+        if (dtoList == null || dtoList.isEmpty()) {
+            return "用户密码重置列表不能为空";
+        }
+        for (UserResetPasswordDTO dto : dtoList) {
+            if (dto.getId().isEmpty()) {
+                return "用户ID不能为空";
+            }
+            // 明文密码加密
+            dto.setPassword(BCrypt.hashpw("123456", BCrypt.gensalt()));
+        }
+        userMapper.resetPassword(dtoList);
+        return "用户重置密码成功";
+    }
+
+    @Override
+    public User getUserInfo(String id, String token) {
+        User user = getUserByToken(token);
+        // 任何人都可查看自己的信息
+        if (user.getId().equals(id)) {
+            return userMapper.selectById(id);
+        }
+        // 超级管理员可以查看任何人的信息
+        if (user.getPermission() == 1) {
+            return userMapper.selectById(id);
+        }
+        // 普通管理员可查看普通用户的信息
+        if (user.getPermission() == 2 && userMapper.selectById(id).getPermission() == 3) {
+            return userMapper.selectById(id);
+        }
+        throw new RuntimeException("暂无权限");
+    }
+
+    @Override
+    public String editPermission(String id, Integer permission, String token) {
+        User user = getUserByToken(token);
+        if (user.getPermission() == 1) {
+            userMapper.editPermission(id, permission);
+        }
+        return "修改用户权限成功";
+    }
+
+    // 获取当前登录用户信息
+    private User getUserByToken(String token) {
+        String currentUserId = jwtUtil.getUserIdFromToken(token);
+        return lambdaQuery().eq(User::getId, currentUserId).one();
     }
 }

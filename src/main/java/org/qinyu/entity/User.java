@@ -32,8 +32,14 @@ public class User {
     @Schema(description = "联系电话", example = "18782565458")
     private String phone;
 
-    @Schema(description = "权限：1-超级管理员；2-普通管理员；3-普通用户", example = "1")
+    @Schema(description = "权限：1-超级管理员；2-普通管理员；3-普通用户", example = "3")
     private Integer permission;
+
+    @Schema(description = "是否启用：1-启用；0-禁用", example = "1")
+    private Integer isEnable;
+
+    @Schema(description = "是否重置密码：1-未重置；2-重置中；3-已重置", example = "1")
+    private Integer isResetPassword;
 
     @Schema(description = "创建时间", example = "")
     private LocalDateTime createTime;
