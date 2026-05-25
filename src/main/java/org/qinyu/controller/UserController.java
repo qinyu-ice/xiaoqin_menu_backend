@@ -54,9 +54,9 @@ public class UserController {
     }
 
     @PostMapping("/apply/reset/password")
-    @Operation(summary = "用户申请重置密码", description = "根据用户ID将用户密码重置字段修改为重置中状态")
-    public Result<String> applyResetPassword(@RequestParam String id) {
-        return Result.ok(userService.applyResetPassword(id));
+    @Operation(summary = "用户申请重置密码", description = "根据用户名将用户密码重置字段修改为重置中状态")
+    public Result<String> applyResetPassword(@RequestParam String name) {
+        return Result.ok(userService.applyResetPassword(name));
     }
 
     @PostMapping("/reset/password")

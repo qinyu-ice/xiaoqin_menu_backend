@@ -20,7 +20,7 @@ public interface UserService extends IService<User> {
 
     String delete(List<String> ids);
 
-    String applyResetPassword(String id);
+    String applyResetPassword(String name);
 
     String resetPassword(List<UserResetPasswordDTO> dtoList);
 

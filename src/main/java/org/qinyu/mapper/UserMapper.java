@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.qinyu.dto.UserResetPasswordDTO;
 import org.qinyu.dto.UserUpdateDTO;
@@ -27,11 +28,14 @@ public interface UserMapper extends BaseMapper<User> {
 
     void deleteByIds(List<String> ids);
 
-    @Update("update user set is_reset_password = 2 where id = #{id}")
-    void updateIsResetPassword(String id);
+    @Update("update user set is_reset_password = 2 where name = #{name}")
+    void updateIsResetPassword(String name);
 
     void resetPassword(List<UserResetPasswordDTO> dtoList);
 
     @Update("update user set permission = #{permission} where id = #{id}")
     void editPermission(String id, Integer permission);
+
+    @Select("select count(*) from user where name = #{name}")
+    int getUserByName(String name);
 }

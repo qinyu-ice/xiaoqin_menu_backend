@@ -75,6 +75,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         if (user.getIsEnable() == 0) {
             map.put("message", "用户" + dto.getName() + "已被禁用");
+            return map;
+        }
+        if (user.getIsResetPassword() == 2) {
+            map.put("message", "用户" + dto.getName() + "重置密码中，暂时无法登录");
+            return map;
         }
         if (!BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
             map.put("message", "用户" + dto.getName() + "密码错误");
@@ -135,12 +140,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public String applyResetPassword(String id) {
-        if (id.isEmpty()) {
-            return "用户ID不能为空";
+    public String applyResetPassword(String name) {
+        if (name.isEmpty()) {
+            return "用户名不能为空";
         }
-        userMapper.updateIsResetPassword(id);
-        return "用户" + id + "申请重置密码成功，请等待管理员审核";
+        boolean exists = userMapper.getUserByName(name) > 0;
+        if (!exists) {
+            return "用户名不存在";
+        }
+        userMapper.updateIsResetPassword(name);
+        return "用户" + name + "申请重置密码成功，请等待管理员审核";
     }
 
     @Override
