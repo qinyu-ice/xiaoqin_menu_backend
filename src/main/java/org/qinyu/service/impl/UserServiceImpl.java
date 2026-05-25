@@ -9,12 +9,14 @@ import org.qinyu.mapper.UserMapper;
 import org.qinyu.service.UserService;
 import org.qinyu.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +33,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public String add(UserRegisterDTO dto) {
@@ -68,6 +73,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             map.put("message", "用户" + dto.getName() + "不存在");
             return map;
         }
+        if (!BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
+            map.put("message", "用户" + dto.getName() + "密码错误");
+            return map;
+        }
         // 创建Token
         // 1. 创建未认证的 Authentication 对象
         UsernamePasswordAuthenticationToken authToken =
@@ -82,6 +91,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         map.put("message", "用户" + dto.getName() + "登录成功");
         map.put("id", user.getId());
         map.put("token", jwt);
+        redisTemplate.opsForValue().set("currentUserId", user.getId(), Duration.ofHours(2));
+        redisTemplate.opsForValue().set("currentUserName", user.getName(), Duration.ofHours(2));
+        redisTemplate.opsForValue().set("token", jwt, Duration.ofHours(2));
+        redisTemplate.opsForValue().set("refresh", "refresh" + jwt, Duration.ofDays(7));
         return map;
     }
 
