@@ -8,6 +8,7 @@ import org.qinyu.dto.UserResetPasswordDTO;
 import org.qinyu.dto.UserUpdateDTO;
 import org.qinyu.entity.User;
 import org.qinyu.service.UserService;
+import org.qinyu.util.JwtUtil;
 import org.qinyu.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
     @Operation(summary = "用户注册", description = "创建用户")
@@ -77,6 +81,13 @@ public class UserController {
     public Result<String> editPermission(@RequestParam String id, @RequestParam Integer permission, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         String token = getToken(authHeader);
         return Result.ok(userService.editPermission(id, permission, token));
+    }
+
+    @GetMapping("/status")
+    @Operation(summary = "获取当前用户状态", description = "获取token的状态")
+    public Result<Boolean> status(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        String token = getToken(authHeader);
+        return Result.ok("获取用户状态成功", jwtUtil.validateToken(token));
     }
 
     // 获取 token

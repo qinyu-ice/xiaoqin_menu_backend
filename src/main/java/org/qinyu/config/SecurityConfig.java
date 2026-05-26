@@ -38,7 +38,7 @@ public class SecurityConfig {
                 // 配置放行规则
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()  // 异步派发不拦截
-                        .requestMatchers("/user/apply/reset/password", "/user/register", "/user/login", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // 接口文档
+                        .requestMatchers("/user/status", "/user/apply/reset/password", "/user/register", "/user/login", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // 接口文档
                         // 其他所有请求都需要认证
                         .requestMatchers("/error").anonymous()
                         .anyRequest().authenticated()

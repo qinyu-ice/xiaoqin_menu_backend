@@ -99,6 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         map.put("message", "用户" + dto.getName() + "登录成功");
         map.put("id", user.getId());
         map.put("name", user.getName());
+        map.put("avatar", user.getAvatar());
         map.put("token", jwt);
         String tokenKey = "user:token:" + user.getId();
         String refreshKey = "user:refresh:" + user.getId();

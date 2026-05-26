@@ -10,6 +10,9 @@ public class UserUpdateDTO {
     @Schema(description = "用户ID", example = "a1b2c3d4e5f67890abcdef1234")
     private String id;
 
+    @Schema(description = "头像", example = "/cute-avatar.png或者网络图片地址")
+    private String avatar;
+
     @Schema(description = "昵称", example = "qin")
     private String nickname;
 

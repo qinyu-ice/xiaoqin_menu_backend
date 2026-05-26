@@ -7,6 +7,9 @@
         SET
         <!-- 使用 trim 标签处理多余的逗号：prefixOverrides 去掉开头的逗号，suffixOverrides 去掉结尾的逗号 -->
         <trim prefix="" suffix="" suffixOverrides=",">
+            <if test="avatar != null and avatar != ''">
+                avatar = #{avatar},
+            </if>
             <if test="nickname != null and nickname != ''">
                 nickname = #{nickname},
             </if>
