@@ -25,7 +25,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/user")
-@Tag(name = "用户服务", description = "用户注册登录，增删改查") // 核心注释
+@Tag(name = "用户服务", description = "用户注册登录，增删改查")
 public class UserController {
 
     @Autowired
@@ -116,7 +116,7 @@ public class UserController {
         if (originalFilename != null && originalFilename.contains(".")) {
             suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        String objectName = UUID.randomUUID().toString() + suffix;
+        String objectName = "user/" + UUID.randomUUID() + suffix;
 
         try {
             byte[] bytes = file.getBytes();
@@ -125,7 +125,7 @@ public class UserController {
         } catch (IOException e) {
             log.error("读取文件失败", e);
             return Result.no("文件读取失败");
-        } catch (RuntimeException e) {  // 捕获 OSS 上传失败抛出的异常
+        } catch (RuntimeException e) {
             log.error("OSS上传失败", e);
             return Result.no("上传失败: " + e.getMessage());
         }

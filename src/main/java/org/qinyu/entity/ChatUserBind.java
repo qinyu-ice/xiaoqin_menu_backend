@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 @TableName("chat_user")
+@Schema(description = "用户会话关系数据")
 public class ChatUserBind {
 
     @Schema(description = "用户ID", example = "a1b2c3d4e5f67890abcdef1234")

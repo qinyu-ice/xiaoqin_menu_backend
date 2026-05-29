@@ -1,5 +1,6 @@
 package org.qinyu.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.qinyu.service.AIService;
 import org.qinyu.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/ai")
+@Tag(name = "AI服务", description = "输入问题，返回答案，支持记忆聊天（20条）")
 public class AIController {
 
     @Autowired

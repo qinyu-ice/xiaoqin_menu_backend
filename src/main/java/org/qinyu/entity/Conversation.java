@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @TableName("spring_ai_chat_memory")
+@Schema(description = "会话数据")
 public class Conversation {
 
     @TableId
