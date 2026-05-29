@@ -26,5 +26,7 @@ public interface UserService extends IService<User> {
 
     User getUserInfo(String id, String token);
 
-    String editPermission(String id, Integer permission,String token);
+    String editPermission(String id, Integer permission, String token);
+
+    Boolean exit(String id);
 }

@@ -2,21 +2,27 @@ package org.qinyu.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.qinyu.dto.UserLoginDTO;
 import org.qinyu.dto.UserRegisterDTO;
 import org.qinyu.dto.UserResetPasswordDTO;
 import org.qinyu.dto.UserUpdateDTO;
 import org.qinyu.entity.User;
 import org.qinyu.service.UserService;
+import org.qinyu.util.AliOssUtil;
 import org.qinyu.util.JwtUtil;
 import org.qinyu.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/user")
 @Tag(name = "用户服务", description = "用户注册登录，增删改查") // 核心注释
@@ -27,6 +33,9 @@ public class UserController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private AliOssUtil aliOssUtil;
 
     @PostMapping("/register")
     @Operation(summary = "用户注册", description = "创建用户")
@@ -88,6 +97,38 @@ public class UserController {
     public Result<Boolean> status(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         String token = getToken(authHeader);
         return Result.ok("获取用户状态成功", jwtUtil.validateToken(token));
+    }
+
+    @GetMapping("/exit")
+    @Operation(summary = "用户登出", description = "删除token等信息")
+    public Result<Boolean> exit(@RequestParam String id) {
+        return Result.ok("用户登出成功", userService.exit(id));
+    }
+
+    @PostMapping("upload/avatar")
+    @Operation(summary = "上传头像", description = "上传本地头像到阿里云OSS对象存储")
+    public Result<String> uploadAvatar(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return Result.no("文件不能为空");
+        }
+        String originalFilename = file.getOriginalFilename();
+        String suffix = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        String objectName = UUID.randomUUID().toString() + suffix;
+
+        try {
+            byte[] bytes = file.getBytes();
+            String url = aliOssUtil.upload(bytes, objectName);
+            return Result.ok("文件上传成功", url);
+        } catch (IOException e) {
+            log.error("读取文件失败", e);
+            return Result.no("文件读取失败");
+        } catch (RuntimeException e) {  // 捕获 OSS 上传失败抛出的异常
+            log.error("OSS上传失败", e);
+            return Result.no("上传失败: " + e.getMessage());
+        }
     }
 
     // 获取 token

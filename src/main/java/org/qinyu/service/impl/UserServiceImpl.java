@@ -196,6 +196,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return "修改用户权限成功";
     }
 
+    @Override
+    public Boolean exit(String id) {
+        if (id.isEmpty()) {
+            return false;
+        }
+        String tokenKey = "user:token:" + id;
+        String refreshKey = "user:refresh:" + id;
+        redisTemplate.delete(tokenKey);
+        redisTemplate.delete(refreshKey);
+        return true;
+    }
+
     // 获取当前登录用户信息
     private User getUserByToken(String token) {
         String currentUserId = jwtUtil.getUserIdFromToken(token);
